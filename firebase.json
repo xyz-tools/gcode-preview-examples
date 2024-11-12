@@ -1,0 +1,12 @@
+{
+  "hosting": {
+    "target": "gcode-preview-examples",
+    "public": "public",
+    
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

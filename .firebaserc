@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "gcode-preview"
+  },
+  "targets": {
+    "gcode-preview": {
+      "hosting": {
+        "gcode-preview-examples": [
+          "gcode-preview-examples"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
