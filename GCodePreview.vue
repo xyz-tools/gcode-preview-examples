@@ -51,7 +51,7 @@ export default {
   methods: {
     processGCode(gcode) {
       this.preview.processGCode(gcode);
-      this.layerCount = this.preview.layers.length;
+      // this.layerCount = this.preview.layers.length;
     },
     async fetchGcode(url) {
       const response = await fetch(url);
