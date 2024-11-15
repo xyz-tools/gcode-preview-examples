@@ -63,6 +63,6 @@ function saveArrayBuffer( buffer, filename ) {
 
 <GCodePreview ref="preview" src="benchy.gcode" />
 
-<a href="#" @click.prevent="handleExport">export stl</a>
+<button @click.prevent="handleExport">Export</button>
 <style module>
 </style>
