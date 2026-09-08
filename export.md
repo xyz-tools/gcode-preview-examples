@@ -58,7 +58,7 @@ function saveArrayBuffer( buffer, filename ) {
 # Exporting
 
 ```
-<GCodePreview src="benchy.gcode" />
+<GCodePreview ref="preview" src="benchy.gcode" />
 ```
 
 <GCodePreview ref="preview" src="benchy.gcode" />

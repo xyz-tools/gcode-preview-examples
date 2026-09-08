@@ -1,12 +1,11 @@
 <template>
   <div>
-    <canvas ref="preview"></canvas>
+    <canvas ref="canvas"></canvas>
   </div>
 </template>
 
 <script>
-import * as GCodePreview from 'gcode-preview';
-const chunkSize = Infinity;
+import { GCodePreview } from 'gcode-preview';
 
 export default {
   props: {
@@ -25,10 +24,10 @@ export default {
   },
 
   async mounted() {
-    this.preview = new GCodePreview.init({
-      allowDragNDrop: true,
+    this.preview = new GCodePreview({
+      droppable: true,
       renderTubes: true,
-      canvas: this.$refs.preview,
+      canvas: this.$refs.canvas,
       endLayer: this.endLayer,
       startLayer: this.startLayer,
       topLayerColor: this.topLayerColor,
@@ -37,53 +36,43 @@ export default {
       buildVolume: { x: 250, y: 220, z: 150 },
       initialCameraPosition: [0, 400, 450],
       extrusionColor: 'cyan',
-      extrusionWidth: 1.1,
+      extrusionWidth: 1.1
     });
 
-    window.addEventListener('resize', () => {
-      this.preview.resize();
-    });
+    window.addEventListener('resize', this.handleResize);
 
-    const lines1 = await this.fetchGcode(this.src);
-    this.loadPreviewChunked(lines1, 50);
+    await this.loadGCode(this.src);
+  },
+
+  beforeUnmount() {
+    window.removeEventListener('resize', this.handleResize);
+    this.preview?.dispose();
+    this.preview = null;
   },
 
   methods: {
-    processGCode(gcode) {
-      this.preview.processGCode(gcode);
-      // this.layerCount = this.preview.layers.length;
+    handleResize() {
+      this.preview?.sceneManager.resize();
     },
-    async fetchGcode(url) {
+
+    // The library reads, parses and draws the stream incrementally on its own,
+    // so there is no need to hand-roll a chunked setTimeout loop anymore.
+    async loadGCode(url) {
       const response = await fetch(url);
 
-      if (response.status !== 200) {
+      if (!response.ok) {
         throw new Error(`status code: ${response.status}`);
       }
 
-      const file = await response.text();
-      return file.split('\n');
+      // clear() also cancels any stream still in flight
+      this.preview.clear();
+      await this.preview.processGCodeStream(response.body);
+
+      this.layerCount = this.preview.countLayers;
     },
 
-    loadPreviewChunked(lines, delay) {
-      let c = 0;
-      const id = '__animationTimer__' + Math.random().toString(36).substr(2, 9);
-      const loadProgressive = () => {
-        const start = c * chunkSize;
-        const end = (c + 1) * chunkSize;
-        const chunk = lines.slice(start, end);
-        this.processGCode(chunk);
-        c++;
-        if (c * chunkSize < lines.length) {
-          window[id] = setTimeout(loadProgressive, delay);
-        }
-      };
-      // cancel loading process if one is still in progress
-      // mostly when hot reloading
-      window.clearTimeout(window[id]);
-      loadProgressive();
-    },
     getModel() {
-      return this.preview.scene;
+      return this.preview.sceneManager.scene;
     }
   }
 };
